@@ -40,18 +40,12 @@ INPT3                    000b
 INPT4                    000c                  
 INPT5                    000d                  
 INTIM                    0284                  
-LoopOverscan             f0ca              (R )
 NextFrame                f013              (R )
 NUSIZ0                   0004                  
 NUSIZ1                   0005                  
 PF0                      000d              (R )
 PF1                      000e              (R )
 PF2                      000f              (R )
-PFBorderBottom           f0a4              (R )
-PFBorderMiddle           f091              (R )
-PFBorderTop              f07e              (R )
-PFEmptyBottom            f0bf              (R )
-PFEmptyTop               f077              (R )
 REFP0                    000b                  
 REFP1                    000c                  
 RESBL                    0014                  
