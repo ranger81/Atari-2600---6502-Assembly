@@ -1,0 +1,145 @@
+    processor 6502
+
+    include "vcs.h"
+    include "macro.h"
+
+    seg code
+    org $F000   ; Defines the origin of the ROM at $F000
+
+START:
+    CLEAN_START     ; Macro to safely clear memory and TIA
+
+    ldx #$80        ; Blue background color
+    stx COLUBK
+    ldx #$1C        ; Yellow playfield color
+    stx COLUPF
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Start a new frame by turning on VBLANK and VSYNC
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+NextFrame:
+    lda #2          ; Same as the binary value %00000010
+    sta VBLANK      ; Turn on VBLANK
+    sta VSYNC       ; Turn on VSYNC
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Generate the three lines of VSYNC
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    REPEAT 3
+        sta WSYNC       ; Three scanlines for VSYNC
+    REPEND
+
+    lda #0
+    sta VSYNC       ; Turn off VSYNC
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Let the TIA output the recommeneded 37 scanlines of VBLANK
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    REPEAT 37
+        sta WSYNC
+    REPEND
+
+    lda #0
+    sta VBLANK      ; Turn off VBLANK
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Set CTRLPF register to allow playfield reflection
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    ldx #%00000001  ; CTRLPF register (D0 means reflect the PF)
+    stx CTRLPF
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Draw 192 visible scanlines (kernel)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; Playfield: Upper empty space
+
+    ldx #7        ; Counter for 192 visibnle scanlines
+PFEmptyTop:
+    sta WSYNC       ; Wait for the next scanline
+    dex             ; X--
+    bne PFEmptyTop ; Loop while X != 0
+
+; Playfield: Upper border
+
+    ldx #7        ; Counter for 192 visibnle scanlines
+PFBorderTop:
+    ldy #$E0
+    sty PF0
+    ldy #$FF
+    sty PF1
+    ldy #$FF
+    sty PF2
+    sta WSYNC       ; Wait for the next scanline
+    dex             ; X--
+    bne PFBorderTop ; Loop while X != 0
+
+
+; Playfield: Middle
+    ldx #164
+PFBorderMiddle:
+    ldy #$20
+    sty PF0
+    ldy #$00
+    sty PF1
+    ldy #$00
+    sty PF2
+    sta WSYNC       ; Wait for the next scanline
+    dex             ; X--
+    bne PFBorderMiddle ; Loop while X != 0
+
+; Playfield: Bottom border
+
+    ldx #7        ; Counter for 192 visibnle scanlines
+PFBorderBottom:
+    ldy #$E0
+    sty PF0
+    ldy #$FF
+    sty PF1
+    ldy #$FF
+    sty PF2
+    sta WSYNC       ; Wait for the next scanline
+    dex             ; X--
+    bne PFBorderBottom ; Loop while X != 0
+
+; Playfield: Reset PF registers
+
+    ldy #$00
+    sty PF0
+    sty PF1
+    sty PF2
+
+; Playfield: Bottom empty space
+
+    ldx #7        ; Counter for 192 visibnle scanlines
+PFEmptyBottom:
+    sta WSYNC       ; Wait for the next scanline
+    dex             ; X--
+    bne PFEmptyBottom ; Loop while X != 0
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Output 30 more VBLANK lines (Overscan) to complete our frame
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    lda #2          ; Hit and turn on VBLANK again
+    sta VBLANK
+    
+    ldx #30         ; Counter for 30 scanlines
+LoopOverscan:
+    sta WSYNC       ; Wait for next scanline
+    dex             ; X--
+    bne LoopOverscan; Loop while X != 0
+
+    jmp NextFrame
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Fill the ROM size to exactly 4KB
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    org $FFFC
+    .word START ; Reset vector at $FFFC (where the program starts)
+    .word START ; Interrupt vector at $FFFE (unused in the VCS)
