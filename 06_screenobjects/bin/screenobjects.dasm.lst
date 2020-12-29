@@ -408,7 +408,7 @@
      29  f00f		       a9 0f		      lda	#%1111	; white playfield color
      30  f011		       85 08		      sta	COLUPF
      31  f013
-     32  f013		       a9 0a		      lda	##10	; A = 10
+     32  f013		       a9 0a		      lda	#10	; A = 10
      33  f015		       85 80		      sta	P0Height	; P0Height = 10
      34  f017		       85 81		      sta	P1Height	; P1Height = 10
      35  f019

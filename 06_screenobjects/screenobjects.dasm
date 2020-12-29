@@ -29,7 +29,7 @@ Reset:
     lda #%1111      ; white playfield color
     sta COLUPF
 
-    lda ##10        ; A = 10
+    lda #10        ; A = 10
     sta P0Height    ; P0Height = 10
     sta P1Height    ; P1Height = 10
 
