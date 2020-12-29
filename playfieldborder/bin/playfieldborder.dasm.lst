@@ -559,7 +559,7 @@
      80  f0a3		       85 02		      sta	WSYNC
      81  f0a5					      REPEND
      82  f0a5
-     83  f0a5							;    Playfield: Middle
+     83  f0a5							; Playfield: Middle
      84  f0a5							; Set the next 164 lines only with PF0 third bit enabled
      85  f0a5
      86  f0a5		       a2 20		      ldx	#%00100000
@@ -899,129 +899,131 @@
      94  f1f9					      REPEND
      95  f1f9
      96  f1f9							; Playfield: Bottom border
-     97  f1f9
-     98  f1f9		       a2 e0		      ldx	#$E0
-     99  f1fb		       86 0d		      stx	PF0
-    100  f1fd		       a2 ff		      ldx	#$FF
-    101  f1ff		       86 0e		      stx	PF1
-    102  f201		       a2 ff		      ldx	#$FF
-    103  f203		       86 0f		      stx	PF2
-    104  f205					      REPEAT	7
-    105  f205		       85 02		      sta	WSYNC
-    104  f205					      REPEND
-    105  f207		       85 02		      sta	WSYNC
-    104  f207					      REPEND
-    105  f209		       85 02		      sta	WSYNC
-    104  f209					      REPEND
-    105  f20b		       85 02		      sta	WSYNC
-    104  f20b					      REPEND
-    105  f20d		       85 02		      sta	WSYNC
-    104  f20d					      REPEND
-    105  f20f		       85 02		      sta	WSYNC
-    104  f20f					      REPEND
-    105  f211		       85 02		      sta	WSYNC
-    106  f213					      REPEND
-    107  f213
-    108  f213							; Playfield: Bottom empty space
-    109  f213
-    110  f213		       a2 00		      ldx	#0
-    111  f215		       86 0d		      stx	PF0
-    112  f217		       86 0e		      stx	PF1
-    113  f219		       86 0f		      stx	PF2
-    114  f21b					      REPEAT	7
-    115  f21b		       85 02		      sta	WSYNC
-    114  f21b					      REPEND
-    115  f21d		       85 02		      sta	WSYNC
-    114  f21d					      REPEND
-    115  f21f		       85 02		      sta	WSYNC
-    114  f21f					      REPEND
-    115  f221		       85 02		      sta	WSYNC
-    114  f221					      REPEND
-    115  f223		       85 02		      sta	WSYNC
-    114  f223					      REPEND
-    115  f225		       85 02		      sta	WSYNC
-    114  f225					      REPEND
-    115  f227		       85 02		      sta	WSYNC
-    116  f229					      REPEND
-    117  f229
-    118  f229							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    119  f229							; Output 30 more VBLANK lines (Overscan) to complete our frame
+     97  f1f9							; Set the PF0 to 1110 (LSB first) and PF1-PF2 as 1111 1111
+     98  f1f9
+     99  f1f9		       a2 e0		      ldx	#$E0
+    100  f1fb		       86 0d		      stx	PF0
+    101  f1fd		       a2 ff		      ldx	#$FF
+    102  f1ff		       86 0e		      stx	PF1
+    103  f201		       a2 ff		      ldx	#$FF
+    104  f203		       86 0f		      stx	PF2
+    105  f205					      REPEAT	7
+    106  f205		       85 02		      sta	WSYNC
+    105  f205					      REPEND
+    106  f207		       85 02		      sta	WSYNC
+    105  f207					      REPEND
+    106  f209		       85 02		      sta	WSYNC
+    105  f209					      REPEND
+    106  f20b		       85 02		      sta	WSYNC
+    105  f20b					      REPEND
+    106  f20d		       85 02		      sta	WSYNC
+    105  f20d					      REPEND
+    106  f20f		       85 02		      sta	WSYNC
+    105  f20f					      REPEND
+    106  f211		       85 02		      sta	WSYNC
+    107  f213					      REPEND
+    108  f213
+    109  f213							; Playfield: Bottom empty space
+    110  f213							; Skip 7 vertical lines with no PF set
+    111  f213
+    112  f213		       a2 00		      ldx	#0
+    113  f215		       86 0d		      stx	PF0
+    114  f217		       86 0e		      stx	PF1
+    115  f219		       86 0f		      stx	PF2
+    116  f21b					      REPEAT	7
+    117  f21b		       85 02		      sta	WSYNC
+    116  f21b					      REPEND
+    117  f21d		       85 02		      sta	WSYNC
+    116  f21d					      REPEND
+    117  f21f		       85 02		      sta	WSYNC
+    116  f21f					      REPEND
+    117  f221		       85 02		      sta	WSYNC
+    116  f221					      REPEND
+    117  f223		       85 02		      sta	WSYNC
+    116  f223					      REPEND
+    117  f225		       85 02		      sta	WSYNC
+    116  f225					      REPEND
+    117  f227		       85 02		      sta	WSYNC
+    118  f229					      REPEND
+    119  f229
     120  f229							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    121  f229
-    122  f229		       a9 02		      lda	#2	; Hit and turn on VBLANK again
-    123  f22b		       85 01		      sta	VBLANK
-    124  f22d
-    125  f22d					      REPEAT	30
-    126  f22d		       85 02		      sta	WSYNC	; Wait for next scanline
-    125  f22d					      REPEND
-    126  f22f		       85 02		      sta	WSYNC	; Wait for next scanline
-    125  f22f					      REPEND
-    126  f231		       85 02		      sta	WSYNC	; Wait for next scanline
-    125  f231					      REPEND
-    126  f233		       85 02		      sta	WSYNC	; Wait for next scanline
-    125  f233					      REPEND
-    126  f235		       85 02		      sta	WSYNC	; Wait for next scanline
-    125  f235					      REPEND
-    126  f237		       85 02		      sta	WSYNC	; Wait for next scanline
-    125  f237					      REPEND
-    126  f239		       85 02		      sta	WSYNC	; Wait for next scanline
-    125  f239					      REPEND
-    126  f23b		       85 02		      sta	WSYNC	; Wait for next scanline
-    125  f23b					      REPEND
-    126  f23d		       85 02		      sta	WSYNC	; Wait for next scanline
-    125  f23d					      REPEND
-    126  f23f		       85 02		      sta	WSYNC	; Wait for next scanline
-    125  f23f					      REPEND
-    126  f241		       85 02		      sta	WSYNC	; Wait for next scanline
-    125  f241					      REPEND
-    126  f243		       85 02		      sta	WSYNC	; Wait for next scanline
-    125  f243					      REPEND
-    126  f245		       85 02		      sta	WSYNC	; Wait for next scanline
-    125  f245					      REPEND
-    126  f247		       85 02		      sta	WSYNC	; Wait for next scanline
-    125  f247					      REPEND
-    126  f249		       85 02		      sta	WSYNC	; Wait for next scanline
-    125  f249					      REPEND
-    126  f24b		       85 02		      sta	WSYNC	; Wait for next scanline
-    125  f24b					      REPEND
-    126  f24d		       85 02		      sta	WSYNC	; Wait for next scanline
-    125  f24d					      REPEND
-    126  f24f		       85 02		      sta	WSYNC	; Wait for next scanline
-    125  f24f					      REPEND
-    126  f251		       85 02		      sta	WSYNC	; Wait for next scanline
-    125  f251					      REPEND
-    126  f253		       85 02		      sta	WSYNC	; Wait for next scanline
-    125  f253					      REPEND
-    126  f255		       85 02		      sta	WSYNC	; Wait for next scanline
-    125  f255					      REPEND
-    126  f257		       85 02		      sta	WSYNC	; Wait for next scanline
-    125  f257					      REPEND
-    126  f259		       85 02		      sta	WSYNC	; Wait for next scanline
-    125  f259					      REPEND
-    126  f25b		       85 02		      sta	WSYNC	; Wait for next scanline
-    125  f25b					      REPEND
-    126  f25d		       85 02		      sta	WSYNC	; Wait for next scanline
-    125  f25d					      REPEND
-    126  f25f		       85 02		      sta	WSYNC	; Wait for next scanline
-    125  f25f					      REPEND
-    126  f261		       85 02		      sta	WSYNC	; Wait for next scanline
-    125  f261					      REPEND
-    126  f263		       85 02		      sta	WSYNC	; Wait for next scanline
-    125  f263					      REPEND
-    126  f265		       85 02		      sta	WSYNC	; Wait for next scanline
-    125  f265					      REPEND
-    126  f267		       85 02		      sta	WSYNC	; Wait for next scanline
-    127  f269					      REPEND
-    128  f269
-    129  f269		       a9 00		      lda	#0
-    130  f26b		       85 01		      sta	VBLANK
-    131  f26d
-    132  f26d		       4c 13 f0 	      jmp	NextFrame
-    133  f270
-    134  f270							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    135  f270							; Fill the ROM size to exactly 4KB
+    121  f229							; Output 30 more VBLANK lines (Overscan) to complete our frame
+    122  f229							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    123  f229
+    124  f229		       a9 02		      lda	#2	; Hit and turn on VBLANK again
+    125  f22b		       85 01		      sta	VBLANK
+    126  f22d
+    127  f22d					      REPEAT	30
+    128  f22d		       85 02		      sta	WSYNC	; Wait for next scanline
+    127  f22d					      REPEND
+    128  f22f		       85 02		      sta	WSYNC	; Wait for next scanline
+    127  f22f					      REPEND
+    128  f231		       85 02		      sta	WSYNC	; Wait for next scanline
+    127  f231					      REPEND
+    128  f233		       85 02		      sta	WSYNC	; Wait for next scanline
+    127  f233					      REPEND
+    128  f235		       85 02		      sta	WSYNC	; Wait for next scanline
+    127  f235					      REPEND
+    128  f237		       85 02		      sta	WSYNC	; Wait for next scanline
+    127  f237					      REPEND
+    128  f239		       85 02		      sta	WSYNC	; Wait for next scanline
+    127  f239					      REPEND
+    128  f23b		       85 02		      sta	WSYNC	; Wait for next scanline
+    127  f23b					      REPEND
+    128  f23d		       85 02		      sta	WSYNC	; Wait for next scanline
+    127  f23d					      REPEND
+    128  f23f		       85 02		      sta	WSYNC	; Wait for next scanline
+    127  f23f					      REPEND
+    128  f241		       85 02		      sta	WSYNC	; Wait for next scanline
+    127  f241					      REPEND
+    128  f243		       85 02		      sta	WSYNC	; Wait for next scanline
+    127  f243					      REPEND
+    128  f245		       85 02		      sta	WSYNC	; Wait for next scanline
+    127  f245					      REPEND
+    128  f247		       85 02		      sta	WSYNC	; Wait for next scanline
+    127  f247					      REPEND
+    128  f249		       85 02		      sta	WSYNC	; Wait for next scanline
+    127  f249					      REPEND
+    128  f24b		       85 02		      sta	WSYNC	; Wait for next scanline
+    127  f24b					      REPEND
+    128  f24d		       85 02		      sta	WSYNC	; Wait for next scanline
+    127  f24d					      REPEND
+    128  f24f		       85 02		      sta	WSYNC	; Wait for next scanline
+    127  f24f					      REPEND
+    128  f251		       85 02		      sta	WSYNC	; Wait for next scanline
+    127  f251					      REPEND
+    128  f253		       85 02		      sta	WSYNC	; Wait for next scanline
+    127  f253					      REPEND
+    128  f255		       85 02		      sta	WSYNC	; Wait for next scanline
+    127  f255					      REPEND
+    128  f257		       85 02		      sta	WSYNC	; Wait for next scanline
+    127  f257					      REPEND
+    128  f259		       85 02		      sta	WSYNC	; Wait for next scanline
+    127  f259					      REPEND
+    128  f25b		       85 02		      sta	WSYNC	; Wait for next scanline
+    127  f25b					      REPEND
+    128  f25d		       85 02		      sta	WSYNC	; Wait for next scanline
+    127  f25d					      REPEND
+    128  f25f		       85 02		      sta	WSYNC	; Wait for next scanline
+    127  f25f					      REPEND
+    128  f261		       85 02		      sta	WSYNC	; Wait for next scanline
+    127  f261					      REPEND
+    128  f263		       85 02		      sta	WSYNC	; Wait for next scanline
+    127  f263					      REPEND
+    128  f265		       85 02		      sta	WSYNC	; Wait for next scanline
+    127  f265					      REPEND
+    128  f267		       85 02		      sta	WSYNC	; Wait for next scanline
+    129  f269					      REPEND
+    130  f269
+    131  f269		       a9 00		      lda	#0
+    132  f26b		       85 01		      sta	VBLANK
+    133  f26d
+    134  f26d		       4c 13 f0 	      jmp	NextFrame
+    135  f270
     136  f270							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    137  f270
-    138  fffc					      org	$FFFC
-    139  fffc		       00 f0		      .word.w	START	; Reset vector at $FFFC (where the program starts)
-    140  fffe		       00 f0		      .word.w	START	; Interrupt vector at $FFFE (unused in the VCS)
+    137  f270							; Fill the ROM size to exactly 4KB
+    138  f270							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    139  f270
+    140  fffc					      org	$FFFC
+    141  fffc		       00 f0		      .word.w	START	; Reset vector at $FFFC (where the program starts)
+    142  fffe		       00 f0		      .word.w	START	; Interrupt vector at $FFFE (unused in the VCS)
