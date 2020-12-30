@@ -21,8 +21,9 @@ CXM1P                    0001
 CXP0FB                   0002                  
 CXP1FB                   0003                  
 CXPPMM                   0007                  
-DivideLoop               f02c              (R )
-DrawBitmap               f102              (R )
+decx                     f128              (R )
+decy                     f109              (R )
+DivideLoop               f03c              (R )
 ENABL                    001f                  
 ENAM0                    001d                  
 ENAM1                    001e                  
@@ -42,13 +43,17 @@ INPT3                    000b
 INPT4                    000c                  
 INPT5                    000d                  
 INTIM                    0284                  
-NextFrame                f259              (R )
+LoadBitmap               f0a8              (R )
 NUSIZ0                   0004                  
 NUSIZ1                   0005                  
-Overscan                 f20d                  
-P0Bitmap                 f25c              (R )
-P0Color                  f265              (R )
+Overscan                 f0b8                  
+P0Bitmap                 f139              (R )
+P0Color                  f142              (R )
+P0Height                 0084              (R )
+P0XDir                   0081              (R )
 P0XPos                   0080              (R )
+P0YDir                   0083              (R )
+P0YPos                   0082              (R )
 PF0                      000d                  
 PF1                      000e                  
 PF2                      000f                  
@@ -63,7 +68,8 @@ RESMP1                   0029
 RESP0                    0010              (R )
 RESP1                    0011                  
 RSYNC                    0003                  
-StartFrame               f013              (R )
+Scanline                 f09e              (R )
+StartFrame               f023              (R )
 SWACNT                   0281                  
 SWBCNT                   0283                  
 SWCHA                    0280                  
@@ -84,4 +90,8 @@ VERSION_MACRO            006a
 VERSION_VCS              0069                  
 VSYNC                    0000              (R )
 WSYNC                    0002              (R )
+xchgdir                  f130              (R )
+xupdated                 f136              (R )
+ychgdir                  f111              (R )
+yupdated                 f117              (R )
 --- End of Symbol List.

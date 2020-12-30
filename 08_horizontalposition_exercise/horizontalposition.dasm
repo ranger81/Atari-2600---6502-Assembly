@@ -24,7 +24,7 @@ P0XPos   byte      ; sprite X coordinate
 Reset:
     CLEAN_START    ; macro to clean memory and TIA
 
-    ldx #$7A       ; black background color
+    ldx #$7A       ; light purple background color
     stx COLUBK
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -128,7 +128,7 @@ Overscan:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     inc P0XPos
     lda P0XPos
-    cmp #80
+    cmp #81
     bcc NextFrame
     lda #40
     sta P0XPos
