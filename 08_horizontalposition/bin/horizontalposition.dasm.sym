@@ -21,15 +21,17 @@ CXM1P                    0001
 CXP0FB                   0002                  
 CXP1FB                   0003                  
 CXPPMM                   0007                  
-DivideLoop               f02c              (R )
-DrawBitmap               f102              (R )
+DivideLoop               f253              (R )
+DrawBitmap               f0ee              (R )
 ENABL                    001f                  
 ENAM0                    001d                  
 ENAM1                    001e                  
+FineAdjustTableBegin     ff00              (R )
+FineAdjustTableEnd       fe0f                  
 GRP0                     001b              (R )
 GRP1                     001c                  
 HMBL                     0024                  
-HMCLR                    002b              (R )
+HMCLR                    002b                  
 HMM0                     0022                  
 HMM1                     0023                  
 HMOVE                    002a              (R )
@@ -44,13 +46,14 @@ INPT5                    000d
 INTIM                    0284                  
 NUSIZ0                   0004                  
 NUSIZ1                   0005                  
-Overscan                 f20d                  
-P0Bitmap                 f252              (R )
-P0Color                  f25b              (R )
+Overscan                 f1f9                  
+P0Bitmap                 f23e              (R )
+P0Color                  f247              (R )
 P0XPos                   0080              (R )
 PF0                      000d                  
 PF1                      000e                  
 PF2                      000f                  
+PositionASpriteSubroutine f250              (R )
 REFP0                    000b                  
 REFP1                    000c                  
 RESBL                    0014                  
