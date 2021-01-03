@@ -1,0 +1,9 @@
+P0Direction
+===========
+
+Bit 0 = X-Direction
+        1 = -> incrementing (right)
+        0 = <- decrementing (left)
+Bit 1 = Y-Direction
+        0 = v incrementing (down)
+        1 = ^ decrementing (up)

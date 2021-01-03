@@ -1,6 +1,6 @@
-------- FILE bouncyballoon.dasm LEVEL 1 PASS 2
-      1  10000 ????						; see https://www.udemy.com/course/programming-games-for-the-atari-2600/learn/lecture/19832364#questions/12288914
-      2  10000 ????				       processor	6502
+------- FILE bouncyball.dasm LEVEL 1 PASS 2
+      1  fffe					      processor	6502
+      2  10000 ????
       3  10000 ????						;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
       4  10000 ????						;; Include required files with register mapping and macros
       5  10000 ????						;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -206,7 +206,7 @@
     198  0000 ????				      SEG
     199  0000 ????
     200  0000 ????						; EOF
-------- FILE bouncyballoon.dasm
+------- FILE bouncyball.dasm
 ------- FILE macro.h LEVEL 2 PASS 2
       0  0000 ????				      include	"macro.h"
       1  0000 ????						; MACRO.H
@@ -372,25 +372,31 @@
     161  0000 ????
     162  0000 ????
     163  0000 ????						; EOF
-------- FILE bouncyballoon.dasm
-      8  0000 ????						;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-      9  0000 ????						;; Start an uninitialized segment at $80 for var declaration.
-     10  0000 ????						;; We have memory from $80 to $FF to work with, minus a few at
-     11  0000 ????						;; the end if we use the stack.
-     12  0000 ????						;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     13 U0085 ????				      seg.u	Variables
-     14 U0080					      org	$80
-     15 U0080		       00	   P0XPos     byte.b		; sprite X coordinate
-     16 U0081		       00	   P0XDir     byte.b
-     17 U0082		       00	   P0YPos     byte.b		; sprite y coordinate
-     18 U0083		       00	   P0YDir     byte.b
-     19 U0084		       00	   P0Height   byte.b		; player sprite height
-     20 U0085							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     21 U0085							;; Start our ROM code segment starting at $F000.
-     22 U0085							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     23  10000 ????				       seg	Code
-     24  f000					      org	$F000
-     25  f000				   Reset
+------- FILE bouncyball.dasm
+      8  0000 ????
+      9  0000 ????						;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     10  0000 ????						;; Start an uninitialized segment at $80 for var declaration.
+     11  0000 ????						;; We have memory from $80 to $FF to work with, minus a few at
+     12  0000 ????						;; the end if we use the stack.
+     13  0000 ????						;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     14 U0088 ????				      seg.u	Variables
+     15 U0080					      org	$80
+     16 U0080		       00	   P0XPos     byte.b		; player 0 X coordinate
+     17 U0081		       00	   P0YPos     byte.b		; player 0 Y coordinate
+     18 U0082		       00	   P0Direction byte.b		; player 0 move direction (see info.txt)
+     19 U0083		       00	   P0XMin     byte.b		; player 0 minimum X coordinate
+     20 U0084		       00	   P0XMax     byte.b		; player 0 maximum X coordinate
+     21 U0085		       00	   P0YMin     byte.b		; player 0 minimum Y coordinate
+     22 U0086		       00	   P0YMax     byte.b		; player 0 maximum Y coordinate
+     23 U0087		       00	   P0Height   byte.b		; player 0 height
+     24 U0088
+     25 U0088							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     26 U0088							;; Start our ROM code segment starting at $F000.
+     27 U0088							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     28  10000 ????				       seg	Code
+     29  f000					      org	$F000
+     30  f000
+     31  f000				   Reset
       0  f000					      CLEAN_START		; macro to clean memory and TIA
       1  f000		       78		      sei
       2  f001		       d8		      cld
@@ -403,303 +409,371 @@
       9  f008		       48		      pha
      10  f009		       d0 fb		      bne	.CLEAR_STACK
      11  f00b
-     27  f00b		       a2 00		      ldx	#$00	; black background color
-     28  f00d		       86 09		      stx	COLUBK
-     29  f00f							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     30  f00f							;; Initialize variables
-     31  f00f							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     32  f00f		       a9 0a		      lda	#10
-     33  f011		       85 80		      sta	P0XPos	; initialize player X coordinate
-     34  f013		       a9 b4		      lda	#180
-     35  f015		       85 82		      sta	P0YPos	; PlayerYPos = 180
-     36  f017		       a9 09		      lda	#9
-     37  f019		       85 84		      sta	P0Height	; P0Height = 9
-     38  f01b		       a9 00		      lda	#$00
-     39  f01d		       85 81		      sta	P0XDir	; initialize player X direction
-     40  f01f		       a9 ff		      lda	#$ff
-     41  f021		       85 83		      sta	P0YDir	; initialize player Y direction
-     42  f023							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     43  f023							;; Start a new frame by configuring VBLANK and VSYNC
-     44  f023							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     45  f023				   StartFrame
-     46  f023		       a9 02		      lda	#2
-     47  f025		       85 01		      sta	VBLANK	; turn VBLANK on
-     48  f027		       85 00		      sta	VSYNC	; turn VSYNC on
-     49  f029							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     50  f029							;; Display 3 vertical lines of VSYNC
-     51  f029							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     52  f029					      REPEAT	3
-     53  f029		       85 02		      sta	WSYNC	; first three VSYNC scanlines
-     52  f029					      REPEND
-     53  f02b		       85 02		      sta	WSYNC	; first three VSYNC scanlines
-     52  f02b					      REPEND
-     53  f02d		       85 02		      sta	WSYNC	; first three VSYNC scanlines
-     54  f02f					      REPEND
-     55  f02f		       a9 00		      lda	#0
-     56  f031		       85 00		      sta	VSYNC	; turn VSYNC off
-     57  f033							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     58  f033							;; Set player horizontal position while in VBLANK
-     59  f033							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     60  f033		       a5 80		      lda	P0XPos	; load register A with desired X position
-     61  f035		       29 7f		      and	#$7F	; same as AND 01111111, forces bit 7 to zero
-     62  f037							; keeping the result positive
-     63  f037		       85 02		      sta	WSYNC	; wait for next scanline
-     64  f039		       85 2b		      sta	HMCLR	; clear old horizontal position values
-     65  f03b		       38		      sec		; set carry flag before subtraction
-     66  f03c				   DivideLoop
-     67  f03c		       e9 0f		      sbc	#15	; A -= 15
-     68  f03e		       b0 fc		      bcs	DivideLoop	; loop while carry flag is still set
-     69  f040		       49 07		      eor	#7	; adjust the remainder in A between -8 and 7
-     70  f042		       0a		      asl		; shift left by 4, as HMP0 uses only 4 bits
-     71  f043		       0a		      asl
-     72  f044		       0a		      asl
-     73  f045		       0a		      asl
-     74  f046		       85 20		      sta	HMP0	; set fine position
-     75  f048		       85 10		      sta	RESP0	; reset 15-step brute position
-     76  f04a		       85 02		      sta	WSYNC	; wait for next scanline
-     77  f04c		       85 2a		      sta	HMOVE	; apply the fine position offset
-     78  f04e							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     79  f04e							;; Let the TIA output the 37 recommended lines of VBLANK
-     80  f04e							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     81  f04e					      REPEAT	37
-     82  f04e		       85 02		      sta	WSYNC
-     81  f04e					      REPEND
-     82  f050		       85 02		      sta	WSYNC
-     81  f050					      REPEND
-     82  f052		       85 02		      sta	WSYNC
-     81  f052					      REPEND
-     82  f054		       85 02		      sta	WSYNC
-     81  f054					      REPEND
-     82  f056		       85 02		      sta	WSYNC
-     81  f056					      REPEND
-     82  f058		       85 02		      sta	WSYNC
-     81  f058					      REPEND
-     82  f05a		       85 02		      sta	WSYNC
-     81  f05a					      REPEND
-     82  f05c		       85 02		      sta	WSYNC
-     81  f05c					      REPEND
-     82  f05e		       85 02		      sta	WSYNC
-     81  f05e					      REPEND
-     82  f060		       85 02		      sta	WSYNC
-     81  f060					      REPEND
-     82  f062		       85 02		      sta	WSYNC
-     81  f062					      REPEND
-     82  f064		       85 02		      sta	WSYNC
-     81  f064					      REPEND
-     82  f066		       85 02		      sta	WSYNC
-     81  f066					      REPEND
-     82  f068		       85 02		      sta	WSYNC
-     81  f068					      REPEND
-     82  f06a		       85 02		      sta	WSYNC
-     81  f06a					      REPEND
-     82  f06c		       85 02		      sta	WSYNC
-     81  f06c					      REPEND
-     82  f06e		       85 02		      sta	WSYNC
-     81  f06e					      REPEND
-     82  f070		       85 02		      sta	WSYNC
-     81  f070					      REPEND
-     82  f072		       85 02		      sta	WSYNC
-     81  f072					      REPEND
-     82  f074		       85 02		      sta	WSYNC
-     81  f074					      REPEND
-     82  f076		       85 02		      sta	WSYNC
-     81  f076					      REPEND
-     82  f078		       85 02		      sta	WSYNC
-     81  f078					      REPEND
-     82  f07a		       85 02		      sta	WSYNC
-     81  f07a					      REPEND
-     82  f07c		       85 02		      sta	WSYNC
-     81  f07c					      REPEND
-     82  f07e		       85 02		      sta	WSYNC
-     81  f07e					      REPEND
-     82  f080		       85 02		      sta	WSYNC
-     81  f080					      REPEND
-     82  f082		       85 02		      sta	WSYNC
-     81  f082					      REPEND
-     82  f084		       85 02		      sta	WSYNC
-     81  f084					      REPEND
-     82  f086		       85 02		      sta	WSYNC
-     81  f086					      REPEND
-     82  f088		       85 02		      sta	WSYNC
-     81  f088					      REPEND
-     82  f08a		       85 02		      sta	WSYNC
-     81  f08a					      REPEND
-     82  f08c		       85 02		      sta	WSYNC
-     81  f08c					      REPEND
-     82  f08e		       85 02		      sta	WSYNC
-     81  f08e					      REPEND
-     82  f090		       85 02		      sta	WSYNC
-     81  f090					      REPEND
-     82  f092		       85 02		      sta	WSYNC
-     81  f092					      REPEND
-     82  f094		       85 02		      sta	WSYNC
-     81  f094					      REPEND
-     82  f096		       85 02		      sta	WSYNC
-     83  f098					      REPEND
-     84  f098		       a9 00		      lda	#0
-     85  f09a		       85 01		      sta	VBLANK	; turn VBLANK off
-     86  f09c							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     87  f09c							;; Draw the 192 visible scanlines
-     88  f09c							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     89  f09c		       a2 c0		      ldx	#192	; X counter contains the remaining scanlines
-     90  f09e				   Scanline
-     91  f09e		       8a		      txa		; transfer X to A
-     92  f09f		       38		      sec		; make sure carry flag is set
-     93  f0a0		       e5 82		      sbc	P0YPos	; subtract sprite Y coordinate
-     94  f0a2		       c5 84		      cmp	P0Height	; are we inside the sprite height bounds?
-     95  f0a4		       90 02		      bcc	LoadBitmap	; if result < SpriteHeight, call subroutine
-     96  f0a6		       a9 00		      lda	#0	; else, set index to 0
-     97  f0a8				   LoadBitmap
-     98  f0a8		       a8		      tay
-     99  f0a9		       b9 39 f1 	      lda	P0Bitmap,Y	; load player bitmap slice of data
-    100  f0ac		       85 02		      sta	WSYNC	; wait for next scanline
-    101  f0ae		       85 1b		      sta	GRP0	; set graphics for player 0 slice
-    102  f0b0		       b9 42 f1 	      lda	P0Color,Y	; load player color from lookup table
-    103  f0b3		       85 06		      sta	COLUP0	; set color for player 0 slice
-    104  f0b5		       ca		      dex
-    105  f0b6		       d0 e6		      bne	Scanline	; repeat next scanline until finished
-    106  f0b8							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    107  f0b8							;; Output 30 more VBLANK overscan lines to complete our frame
-    108  f0b8							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    109  f0b8				   Overscan
-    110  f0b8		       a9 02		      lda	#2
-    111  f0ba		       85 01		      sta	VBLANK	; turn VBLANK on again for overscan
-    112  f0bc					      REPEAT	30
-    113  f0bc		       85 02		      sta	WSYNC
-    112  f0bc					      REPEND
-    113  f0be		       85 02		      sta	WSYNC
-    112  f0be					      REPEND
-    113  f0c0		       85 02		      sta	WSYNC
-    112  f0c0					      REPEND
-    113  f0c2		       85 02		      sta	WSYNC
-    112  f0c2					      REPEND
-    113  f0c4		       85 02		      sta	WSYNC
-    112  f0c4					      REPEND
-    113  f0c6		       85 02		      sta	WSYNC
-    112  f0c6					      REPEND
-    113  f0c8		       85 02		      sta	WSYNC
-    112  f0c8					      REPEND
-    113  f0ca		       85 02		      sta	WSYNC
-    112  f0ca					      REPEND
-    113  f0cc		       85 02		      sta	WSYNC
-    112  f0cc					      REPEND
-    113  f0ce		       85 02		      sta	WSYNC
-    112  f0ce					      REPEND
-    113  f0d0		       85 02		      sta	WSYNC
-    112  f0d0					      REPEND
-    113  f0d2		       85 02		      sta	WSYNC
-    112  f0d2					      REPEND
-    113  f0d4		       85 02		      sta	WSYNC
-    112  f0d4					      REPEND
-    113  f0d6		       85 02		      sta	WSYNC
-    112  f0d6					      REPEND
-    113  f0d8		       85 02		      sta	WSYNC
-    112  f0d8					      REPEND
-    113  f0da		       85 02		      sta	WSYNC
-    112  f0da					      REPEND
-    113  f0dc		       85 02		      sta	WSYNC
-    112  f0dc					      REPEND
-    113  f0de		       85 02		      sta	WSYNC
-    112  f0de					      REPEND
-    113  f0e0		       85 02		      sta	WSYNC
-    112  f0e0					      REPEND
-    113  f0e2		       85 02		      sta	WSYNC
-    112  f0e2					      REPEND
-    113  f0e4		       85 02		      sta	WSYNC
-    112  f0e4					      REPEND
-    113  f0e6		       85 02		      sta	WSYNC
-    112  f0e6					      REPEND
-    113  f0e8		       85 02		      sta	WSYNC
-    112  f0e8					      REPEND
-    113  f0ea		       85 02		      sta	WSYNC
-    112  f0ea					      REPEND
-    113  f0ec		       85 02		      sta	WSYNC
-    112  f0ec					      REPEND
-    113  f0ee		       85 02		      sta	WSYNC
-    112  f0ee					      REPEND
-    113  f0f0		       85 02		      sta	WSYNC
-    112  f0f0					      REPEND
-    113  f0f2		       85 02		      sta	WSYNC
-    112  f0f2					      REPEND
-    113  f0f4		       85 02		      sta	WSYNC
-    112  f0f4					      REPEND
-    113  f0f6		       85 02		      sta	WSYNC
-    114  f0f8					      REPEND
-    115  f0f8							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    116  f0f8							;; Decrement Y-coordinate in each frame for animation effect
-    117  f0f8							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    118  f0f8		       a5 83		      lda	P0YDir
-    119  f0fa		       d0 0d		      bne	decy
-    120  f0fc		       e6 82		      inc	P0YPos
-    121  f0fe		       a5 82		      lda	P0YPos
-    122  f100		       c9 b9		      cmp	#185
-    123  f102		       d0 13		      bne	yupdated
-    124  f104		       f0 0b		      beq	ychgdir
-    125  f106		       4c 17 f1 	      jmp	yupdated
-    126  f109				   decy
-    127  f109		       c6 82		      dec	P0YPos
-    128  f10b		       a5 82		      lda	P0YPos
-    129  f10d		       c9 00		      cmp	#0
-    130  f10f		       d0 06		      bne	yupdated
-    131  f111				   ychgdir
-    132  f111		       a5 83		      lda	P0YDir
-    133  f113		       49 ff		      eor	#$ff
-    134  f115		       85 83		      sta	P0YDir
-    135  f117				   yupdated
-    136  f117							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    137  f117							;; Increment X coordinate before next frame for animation.
-    138  f117							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    139  f117		       a5 81		      lda	P0XDir
-    140  f119		       d0 0d		      bne	decx
-    141  f11b		       e6 80		      inc	P0XPos
-    142  f11d		       a5 80		      lda	P0XPos
-    143  f11f		       c9 7f		      cmp	#$7f
-    144  f121		       d0 13		      bne	xupdated
-    145  f123		       f0 0b		      beq	xchgdir
-    146  f125		       4c 36 f1 	      jmp	xupdated
-    147  f128				   decx
-    148  f128		       c6 80		      dec	P0XPos
-    149  f12a		       a5 80		      lda	P0XPos
-    150  f12c		       c9 00		      cmp	#0
-    151  f12e		       d0 06		      bne	xupdated
-    152  f130				   xchgdir
-    153  f130		       a5 81		      lda	P0XDir
-    154  f132		       49 ff		      eor	#$ff
-    155  f134		       85 81		      sta	P0XDir
-    156  f136				   xupdated
-    157  f136							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    158  f136							;; Loop to next frame
-    159  f136							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    160  f136		       4c 23 f0 	      jmp	StartFrame
-    161  f139							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    162  f139							;; Lookup table for the player graphics bitmap.
-    163  f139							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    164  f139				   P0Bitmap
-    165  f139		       00		      byte.b	#%00000000
-    166  f13a		       10		      byte.b	#%00010000
-    167  f13b		       08		      byte.b	#%00001000
-    168  f13c		       1c		      byte.b	#%00011100
-    169  f13d		       36		      byte.b	#%00110110
-    170  f13e		       2e		      byte.b	#%00101110
-    171  f13f		       2e		      byte.b	#%00101110
-    172  f140		       3e		      byte.b	#%00111110
-    173  f141		       1c		      byte.b	#%00011100
-    174  f142							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    175  f142							;; Lookup table for the player colors.
-    176  f142							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    177  f142				   P0Color
-    178  f142		       00		      byte.b	#$00
-    179  f143		       02		      byte.b	#$02
-    180  f144		       02		      byte.b	#$02
-    181  f145		       52		      byte.b	#$52
-    182  f146		       52		      byte.b	#$52
-    183  f147		       52		      byte.b	#$52
-    184  f148		       52		      byte.b	#$52
-    185  f149		       52		      byte.b	#$52
-    186  f14a		       52		      byte.b	#$52
-    187  f14b							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    188  f14b							;; Complete ROM size
-    189  f14b							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    190  fffc					      org	$FFFC
-    191  fffc		       00 f0		      word.w	Reset
-    192  fffe		       00 f0		      word.w	Reset
+     33  f00b
+     34  f00b		       a2 7a		      ldx	#$7A	; light purple background color
+     35  f00d		       86 09		      stx	COLUBK
+     36  f00f
+     37  f00f							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     38  f00f							;; Initialize variables
+     39  f00f							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     40  f00f		       a9 05		      lda	#5
+     41  f011		       85 83		      sta	P0XMin	; set player 0 minimum X coordinate
+     42  f013		       a9 7f		      lda	#127
+     43  f015		       85 84		      sta	P0XMax	; set player 0 maximum X coordinate
+     44  f017		       a9 0a		      lda	#10
+     45  f019		       85 85		      sta	P0YMin	; set player 0 minumum Y coordinate
+     46  f01b		       a9 a0		      lda	#160
+     47  f01d		       85 86		      sta	P0YMax	; set player 0 maximum Y coordinate
+     48  f01f
+     49  f01f		       a9 09		      lda	#9
+     50  f021		       85 87		      sta	P0Height	; set player 0 sprite height
+     51  f023
+     52  f023		       a5 01		      lda	%00000001	; down and right
+     53  f025		       85 82		      sta	P0Direction	; set player 0 initial directions
+     54  f027
+     55  f027		       a9 28		      lda	#40
+     56  f029		       85 80		      sta	P0XPos	; initial player 0 X position
+     57  f02b		       a9 0a		      lda	#10
+     58  f02d		       85 81		      sta	P0YPos	; initial player 0 Y position
+     59  f02f
+     60  f02f							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     61  f02f							;; Start a new frame by configuring VBLANK and VSYNC
+     62  f02f							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     63  f02f				   StartFrame
+     64  f02f		       a9 02		      lda	#2
+     65  f031		       85 01		      sta	VBLANK	; turn VBLANK on
+     66  f033		       85 00		      sta	VSYNC	; turn VSYNC on
+     67  f035
+     68  f035							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     69  f035							;; Display 3 vertical lines of VSYNC
+     70  f035							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     71  f035					      REPEAT	3
+     72  f035		       85 02		      sta	WSYNC	; first three VSYNC scanlines
+     71  f035					      REPEND
+     72  f037		       85 02		      sta	WSYNC	; first three VSYNC scanlines
+     71  f037					      REPEND
+     72  f039		       85 02		      sta	WSYNC	; first three VSYNC scanlines
+     73  f03b					      REPEND
+     74  f03b		       a9 00		      lda	#0
+     75  f03d		       85 00		      sta	VSYNC	; turn VSYNC off
+     76  f03f
+     77  f03f							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     78  f03f							;; Set player horizontal position while in VBLANK
+     79  f03f							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     80  f03f		       a5 80		      lda	P0XPos	; load register A with desired X position
+     81  f041		       29 7f		      and	#$7F	; same as AND 01111111, forces bit 7 to zero
+     82  f043							; keeping the result positive
+     83  f043
+     84  f043		       38		      sec		; set carry flag before subtraction
+     85  f044
+     86  f044		       85 02		      sta	WSYNC	; wait for next scanline
+     87  f046		       85 2b		      sta	HMCLR	; clear old horizontal position values
+     88  f048
+     89  f048				   DivideLoop
+     90  f048		       e9 0f		      sbc	#15	; Subtract 15 from A
+     91  f04a		       b0 fc		      bcs	DivideLoop	; loop while carry flag is still set
+     92  f04c
+     93  f04c		       49 07		      eor	#7	; adjust the remainder in A between -8 and 7
+     94  f04e		       0a		      asl		; shift left by 4, as HMP0 uses only 4 bits
+     95  f04f		       0a		      asl
+     96  f050		       0a		      asl
+     97  f051		       0a		      asl
+     98  f052		       85 20		      sta	HMP0	; set smooth position value
+     99  f054		       85 10		      sta	RESP0	; fix rough position
+    100  f056		       85 02		      sta	WSYNC	; wait for next scanline
+    101  f058		       85 2a		      sta	HMOVE	; apply the fine position offset
+    102  f05a
+    103  f05a							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    104  f05a							;; Let the TIA output the 35 (37-2) recommended lines of VBLANK
+    105  f05a							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    106  f05a					      REPEAT	35
+    107  f05a		       85 02		      sta	WSYNC
+    106  f05a					      REPEND
+    107  f05c		       85 02		      sta	WSYNC
+    106  f05c					      REPEND
+    107  f05e		       85 02		      sta	WSYNC
+    106  f05e					      REPEND
+    107  f060		       85 02		      sta	WSYNC
+    106  f060					      REPEND
+    107  f062		       85 02		      sta	WSYNC
+    106  f062					      REPEND
+    107  f064		       85 02		      sta	WSYNC
+    106  f064					      REPEND
+    107  f066		       85 02		      sta	WSYNC
+    106  f066					      REPEND
+    107  f068		       85 02		      sta	WSYNC
+    106  f068					      REPEND
+    107  f06a		       85 02		      sta	WSYNC
+    106  f06a					      REPEND
+    107  f06c		       85 02		      sta	WSYNC
+    106  f06c					      REPEND
+    107  f06e		       85 02		      sta	WSYNC
+    106  f06e					      REPEND
+    107  f070		       85 02		      sta	WSYNC
+    106  f070					      REPEND
+    107  f072		       85 02		      sta	WSYNC
+    106  f072					      REPEND
+    107  f074		       85 02		      sta	WSYNC
+    106  f074					      REPEND
+    107  f076		       85 02		      sta	WSYNC
+    106  f076					      REPEND
+    107  f078		       85 02		      sta	WSYNC
+    106  f078					      REPEND
+    107  f07a		       85 02		      sta	WSYNC
+    106  f07a					      REPEND
+    107  f07c		       85 02		      sta	WSYNC
+    106  f07c					      REPEND
+    107  f07e		       85 02		      sta	WSYNC
+    106  f07e					      REPEND
+    107  f080		       85 02		      sta	WSYNC
+    106  f080					      REPEND
+    107  f082		       85 02		      sta	WSYNC
+    106  f082					      REPEND
+    107  f084		       85 02		      sta	WSYNC
+    106  f084					      REPEND
+    107  f086		       85 02		      sta	WSYNC
+    106  f086					      REPEND
+    107  f088		       85 02		      sta	WSYNC
+    106  f088					      REPEND
+    107  f08a		       85 02		      sta	WSYNC
+    106  f08a					      REPEND
+    107  f08c		       85 02		      sta	WSYNC
+    106  f08c					      REPEND
+    107  f08e		       85 02		      sta	WSYNC
+    106  f08e					      REPEND
+    107  f090		       85 02		      sta	WSYNC
+    106  f090					      REPEND
+    107  f092		       85 02		      sta	WSYNC
+    106  f092					      REPEND
+    107  f094		       85 02		      sta	WSYNC
+    106  f094					      REPEND
+    107  f096		       85 02		      sta	WSYNC
+    106  f096					      REPEND
+    107  f098		       85 02		      sta	WSYNC
+    106  f098					      REPEND
+    107  f09a		       85 02		      sta	WSYNC
+    106  f09a					      REPEND
+    107  f09c		       85 02		      sta	WSYNC
+    106  f09c					      REPEND
+    107  f09e		       85 02		      sta	WSYNC
+    108  f0a0					      REPEND
+    109  f0a0
+    110  f0a0		       a9 00		      lda	#0
+    111  f0a2		       85 01		      sta	VBLANK	; turn VBLANK off
+    112  f0a4
+    113  f0a4							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    114  f0a4							;; Draw the 192 visible scanlines
+    115  f0a4							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    116  f0a4							;    REPEAT 60
+    117  f0a4							;	  sta WSYNC  ; wait for 60 empty scanlines
+    118  f0a4							;    REPEND
+    119  f0a4							;
+    120  f0a4							;    ldy 8	     ; counter to draw 8 rows of bitmap
+    121  f0a4							;DrawBitmap:
+    122  f0a4							;    lda P0Bitmap,Y ; load player bitmap slice of data
+    123  f0a4							;    sta GRP0	     ; set graphics for player 0 slice
+    124  f0a4							;
+    125  f0a4							;    lda P0Color,Y  ; load player color from lookup table
+    126  f0a4							;    sta COLUP0     ; set color for player 0 slice
+    127  f0a4							;
+    128  f0a4							;    sta WSYNC      ; wait for next scanline
+    129  f0a4							;
+    130  f0a4							;    dey
+    131  f0a4							;    bne DrawBitmap ; repeat next scanline until finished
+    132  f0a4							;
+    133  f0a4							;    lda #0
+    134  f0a4							;    sta GRP0	     ; disable P0 bitmap graphics
+    135  f0a4							;
+    136  f0a4							;    REPEAT 124
+    137  f0a4							;	  sta WSYNC  ; wait for remaining 124 empty scanlines
+    138  f0a4							;    REPEND
+    139  f0a4
+    140  f0a4							;-----------------------------------------
+    141  f0a4		       a2 c0		      ldx	#192	; X counter contains the remaining scanlines
+    142  f0a6				   Scanline
+    143  f0a6		       8a		      txa		; transfer X to A
+    144  f0a7		       38		      sec		; make sure carry flag is set
+    145  f0a8		       e5 81		      sbc	P0YPos	; subtract sprite Y coordinate
+    146  f0aa		       c5 87		      cmp	P0Height	; are we inside the sprite height bounds?
+    147  f0ac		       90 02		      bcc	LoadBitmap	; if result < SpriteHeight, call subroutine
+    148  f0ae		       a9 00		      lda	#0	; else, set index to 0
+    149  f0b0				   LoadBitmap
+    150  f0b0		       a8		      tay
+    151  f0b1		       b9 53 f1 	      lda	P0Bitmap,Y	; load player bitmap slice of data
+    152  f0b4		       85 02		      sta	WSYNC	; wait for next scanline
+    153  f0b6		       85 1b		      sta	GRP0	; set graphics for player 0 slice
+    154  f0b8		       b9 5c f1 	      lda	P0Color,Y	; load player color from lookup table
+    155  f0bb		       85 06		      sta	COLUP0	; set color for player 0 slice
+    156  f0bd		       ca		      dex
+    157  f0be		       d0 e6		      bne	Scanline	; repeat next scanline until finished
+    158  f0c0
+    159  f0c0							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    160  f0c0							;; Output 30 more VBLANK overscan lines to complete our frame
+    161  f0c0							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    162  f0c0				   Overscan
+    163  f0c0		       a9 02		      lda	#2
+    164  f0c2		       85 01		      sta	VBLANK	; turn VBLANK on again for overscan
+    165  f0c4					      REPEAT	30
+    166  f0c4		       85 02		      sta	WSYNC
+    165  f0c4					      REPEND
+    166  f0c6		       85 02		      sta	WSYNC
+    165  f0c6					      REPEND
+    166  f0c8		       85 02		      sta	WSYNC
+    165  f0c8					      REPEND
+    166  f0ca		       85 02		      sta	WSYNC
+    165  f0ca					      REPEND
+    166  f0cc		       85 02		      sta	WSYNC
+    165  f0cc					      REPEND
+    166  f0ce		       85 02		      sta	WSYNC
+    165  f0ce					      REPEND
+    166  f0d0		       85 02		      sta	WSYNC
+    165  f0d0					      REPEND
+    166  f0d2		       85 02		      sta	WSYNC
+    165  f0d2					      REPEND
+    166  f0d4		       85 02		      sta	WSYNC
+    165  f0d4					      REPEND
+    166  f0d6		       85 02		      sta	WSYNC
+    165  f0d6					      REPEND
+    166  f0d8		       85 02		      sta	WSYNC
+    165  f0d8					      REPEND
+    166  f0da		       85 02		      sta	WSYNC
+    165  f0da					      REPEND
+    166  f0dc		       85 02		      sta	WSYNC
+    165  f0dc					      REPEND
+    166  f0de		       85 02		      sta	WSYNC
+    165  f0de					      REPEND
+    166  f0e0		       85 02		      sta	WSYNC
+    165  f0e0					      REPEND
+    166  f0e2		       85 02		      sta	WSYNC
+    165  f0e2					      REPEND
+    166  f0e4		       85 02		      sta	WSYNC
+    165  f0e4					      REPEND
+    166  f0e6		       85 02		      sta	WSYNC
+    165  f0e6					      REPEND
+    166  f0e8		       85 02		      sta	WSYNC
+    165  f0e8					      REPEND
+    166  f0ea		       85 02		      sta	WSYNC
+    165  f0ea					      REPEND
+    166  f0ec		       85 02		      sta	WSYNC
+    165  f0ec					      REPEND
+    166  f0ee		       85 02		      sta	WSYNC
+    165  f0ee					      REPEND
+    166  f0f0		       85 02		      sta	WSYNC
+    165  f0f0					      REPEND
+    166  f0f2		       85 02		      sta	WSYNC
+    165  f0f2					      REPEND
+    166  f0f4		       85 02		      sta	WSYNC
+    165  f0f4					      REPEND
+    166  f0f6		       85 02		      sta	WSYNC
+    165  f0f6					      REPEND
+    166  f0f8		       85 02		      sta	WSYNC
+    165  f0f8					      REPEND
+    166  f0fa		       85 02		      sta	WSYNC
+    165  f0fa					      REPEND
+    166  f0fc		       85 02		      sta	WSYNC
+    165  f0fc					      REPEND
+    166  f0fe		       85 02		      sta	WSYNC
+    167  f100					      REPEND
+    168  f100
+    169  f100							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    170  f100							;; Adjust coordinates and directions for the next frame
+    171  f100							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    172  f100
+    173  f100							; check current direction for X
+    174  f100		       a5 82		      lda	P0Direction
+    175  f102		       29 01		      and	#%00000001	; X-Direction Bit
+    176  f104		       f0 11		      beq	P0XDecr
+    177  f106
+    178  f106							; increment + eventually switch direction
+    179  f106		       e6 80		      inc	P0XPos
+    180  f108		       a5 80		      lda	P0XPos
+    181  f10a		       c5 84		      cmp	P0XMax
+    182  f10c		       90 1a		      bcc	P0Y
+    183  f10e		       a5 82		      lda	P0Direction
+    184  f110							;eor %00000001
+    185  f110		       29 fe		      and	#%11111110
+    186  f112		       85 82		      sta	P0Direction
+    187  f114		       4c 28 f1 	      jmp	P0Y
+    188  f117
+    189  f117							; decrement + eventually switch direction
+    190  f117				   P0XDecr
+    191  f117		       c6 80		      dec	P0XPos
+    192  f119		       a5 80		      lda	P0XPos
+    193  f11b		       c5 83		      cmp	P0XMin
+    194  f11d		       b0 09		      bcs	P0Y
+    195  f11f		       a5 82		      lda	P0Direction
+    196  f121							;eor %00000001
+    197  f121		       09 01		      ora	#%00000001
+    198  f123		       85 82		      sta	P0Direction
+    199  f125		       4c 28 f1 	      jmp	P0Y
+    200  f128
+    201  f128
+    202  f128							; check current direction for Y
+    203  f128				   P0Y
+    204  f128		       a5 82		      lda	P0Direction
+    205  f12a		       29 02		      and	#%00000010	; Y-Direction Bit
+    206  f12c		       d0 11		      bne	P0YDecr
+    207  f12e
+    208  f12e							; increment + eventually switch direction
+    209  f12e		       e6 81		      inc	P0YPos
+    210  f130		       a5 81		      lda	P0YPos
+    211  f132		       c5 86		      cmp	P0YMax
+    212  f134		       90 1a		      bcc	NextFrame
+    213  f136		       a5 82		      lda	P0Direction
+    214  f138							;eor %00000010
+    215  f138		       09 02		      ora	#%00000010
+    216  f13a		       85 82		      sta	P0Direction
+    217  f13c		       4c 50 f1 	      jmp	NextFrame
+    218  f13f
+    219  f13f							; decrement + eventually switch direction
+    220  f13f				   P0YDecr
+    221  f13f		       c6 81		      dec	P0YPos
+    222  f141		       a5 81		      lda	P0YPos
+    223  f143		       c5 85		      cmp	P0YMin
+    224  f145		       b0 09		      bcs	NextFrame
+    225  f147		       a5 82		      lda	P0Direction
+    226  f149							;eor %00000010
+    227  f149		       29 fd		      and	#%11111101
+    228  f14b		       85 82		      sta	P0Direction
+    229  f14d		       4c 50 f1 	      jmp	NextFrame
+    230  f150
+    231  f150				   NextFrame
+    232  f150							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    233  f150							;; Loop to next frame
+    234  f150							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    235  f150		       4c 2f f0 	      jmp	StartFrame
+    236  f153
+    237  f153							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    238  f153							;; Lookup table for the player graphics bitmap.
+    239  f153							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    240  f153				   P0Bitmap
+    241  f153		       00		      byte.b	#%00000000
+    242  f154		       10		      byte.b	#%00010000
+    243  f155		       08		      byte.b	#%00001000
+    244  f156		       1c		      byte.b	#%00011100
+    245  f157		       36		      byte.b	#%00110110
+    246  f158		       2e		      byte.b	#%00101110
+    247  f159		       2e		      byte.b	#%00101110
+    248  f15a		       3e		      byte.b	#%00111110
+    249  f15b		       1c		      byte.b	#%00011100
+    250  f15c
+    251  f15c							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    252  f15c							;; Lookup table for the player colors.
+    253  f15c							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    254  f15c				   P0Color
+    255  f15c		       00		      byte.b	#$00
+    256  f15d		       02		      byte.b	#$02
+    257  f15e		       02		      byte.b	#$02
+    258  f15f		       52		      byte.b	#$52
+    259  f160		       52		      byte.b	#$52
+    260  f161		       52		      byte.b	#$52
+    261  f162		       52		      byte.b	#$52
+    262  f163		       52		      byte.b	#$52
+    263  f164		       52		      byte.b	#$52
+    264  f165
+    265  f165							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    266  f165							;; Complete ROM size
+    267  f165							;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    268  fffc					      org	$FFFC
+    269  fffc		       00 f0		      word.w	Reset
+    270  fffe		       00 f0		      word.w	Reset
