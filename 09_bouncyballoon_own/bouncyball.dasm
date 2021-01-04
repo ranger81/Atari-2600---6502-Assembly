@@ -46,7 +46,7 @@ Reset:
     lda #160
     sta P0YMax      ; set player 0 maximum Y coordinate
 
-    lda #9
+    lda #8
     sta P0Height    ; set player 0 sprite height
 
     lda %00000001   ; down and right
@@ -138,23 +138,39 @@ DivideLoop:
 ;    REPEND
 
     ;-----------------------------------------
-    ldx #192       ; X counter contains the remaining scanlines
-Scanline:
-    txa            ; transfer X to A
-    sec            ; make sure carry flag is set
-    sbc P0YPos     ; subtract sprite Y coordinate
-    cmp P0Height   ; are we inside the sprite height bounds?
-    bcc LoadBitmap ; if result < SpriteHeight, call subroutine
-    lda #0         ; else, set index to 0
-LoadBitmap:
-    tay
+    ldx #192
+
+VisibleScanlines:
+    txa
+    cmp P0YPos
+    bne ScanlineWSYNC
+
+    ldy P0Height          ; counter to draw 8 rows of bitmap
+DrawBitmap:
     lda P0Bitmap,Y ; load player bitmap slice of data
     sta WSYNC      ; wait for next scanline
     sta GRP0       ; set graphics for player 0 slice
+
     lda P0Color,Y  ; load player color from lookup table
     sta COLUP0     ; set color for player 0 slice
+
     dex
-    bne Scanline   ; repeat next scanline until finished
+    dey
+    bne DrawBitmap ; repeat next scanline until finished
+
+    lda #0
+    sta WSYNC
+    sta GRP0       ; disable P0 bitmap graphics
+
+ScanlineWSYNC:
+    lda #0
+    sta WSYNC
+
+CheckLoop:
+    dex
+    bne VisibleScanlines            ; done with 192 visible scanlines?
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Output 30 more VBLANK overscan lines to complete our frame

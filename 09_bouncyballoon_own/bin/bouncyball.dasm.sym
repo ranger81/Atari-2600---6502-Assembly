@@ -7,6 +7,7 @@ AUDF0                    0017
 AUDF1                    0018                  
 AUDV0                    0019                  
 AUDV1                    001a                  
+CheckLoop                f0c7                  
 COLUBK                   0009              (R )
 COLUP0                   0006              (R )
 COLUP1                   0007                  
@@ -22,6 +23,7 @@ CXP0FB                   0002
 CXP1FB                   0003                  
 CXPPMM                   0007                  
 DivideLoop               f048              (R )
+DrawBitmap               f0ad              (R )
 ENABL                    001f                  
 ENAM0                    001d                  
 ENAM1                    001e                  
@@ -41,21 +43,20 @@ INPT3                    000b
 INPT4                    000c                  
 INPT5                    000d                  
 INTIM                    0284                  
-LoadBitmap               f0b0              (R )
-NextFrame                f150              (R )
+NextFrame                f15a              (R )
 NUSIZ0                   0004                  
 NUSIZ1                   0005                  
-Overscan                 f0c0                  
-P0Bitmap                 f153              (R )
-P0Color                  f15c              (R )
+Overscan                 f0ca                  
+P0Bitmap                 f15d              (R )
+P0Color                  f166              (R )
 P0Direction              0082              (R )
 P0Height                 0087              (R )
-P0XDecr                  f117              (R )
+P0XDecr                  f121              (R )
 P0XMax                   0084              (R )
 P0XMin                   0083              (R )
 P0XPos                   0080              (R )
-P0Y                      f128              (R )
-P0YDecr                  f13f              (R )
+P0Y                      f132              (R )
+P0YDecr                  f149              (R )
 P0YMax                   0086              (R )
 P0YMin                   0085              (R )
 P0YPos                   0081              (R )
@@ -73,7 +74,7 @@ RESMP1                   0029
 RESP0                    0010              (R )
 RESP1                    0011                  
 RSYNC                    0003                  
-Scanline                 f0a6              (R )
+ScanlineWSYNC            f0c3              (R )
 StartFrame               f02f              (R )
 SWACNT                   0281                  
 SWBCNT                   0283                  
@@ -93,6 +94,7 @@ VDELP0                   0025
 VDELP1                   0026                  
 VERSION_MACRO            006a                  
 VERSION_VCS              0069                  
+VisibleScanlines         f0a6              (R )
 VSYNC                    0000              (R )
 WSYNC                    0002              (R )
 --- End of Symbol List.
