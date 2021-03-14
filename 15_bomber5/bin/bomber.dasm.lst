@@ -634,7 +634,7 @@
     141  f0f7		       a9 00		      lda	#0
     142  f0f9		       85 0f		      sta	PF2	; setting PF2 bit pattern
     143  f0fb
-    144  f0fb		       a2 56		      ldx	#86	; X counts the number of remaining scanlines
+    144  f0fb		       a2 54		      ldx	#84	; X counts the number of remaining scanlines ; WHY ONLY 84? not 86?
     145  f0fd				   .GameLineLoop
     146  f0fd				   .AreWeInsideJetSprite
     147  f0fd		       8a		      txa		; transfer X to A
